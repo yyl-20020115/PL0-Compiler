@@ -11,9 +11,9 @@ int wmain(int argc, wchar_t** argv)
 #else
 int main(int argc, char** argv)
 {
-	std::wstring fn;
+	std::string fn;
 	if (argc >= 2) {
-		fn = Convert(argv[1]);
+		fn = argv[1];
 	}
 #endif
 

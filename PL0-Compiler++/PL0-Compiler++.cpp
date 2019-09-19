@@ -1,4 +1,5 @@
 ﻿#include "PL0-Compiler++.h"
+#include <string.h>
 
 PL0_Compiler::PL0_Compiler()
 	: table()
