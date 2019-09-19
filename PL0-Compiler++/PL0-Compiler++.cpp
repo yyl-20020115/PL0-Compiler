@@ -1620,133 +1620,184 @@ void PL0_Compiler::interpret()
 	wchar_t cm;
 	int p, b, t;             //指令指针，指令基址，栈顶指针
 	struct instruction i;  //存放当前指令
-	int s[STACK_DEPTH] = { 0 };      //栈
-
-	this->common_print(L"start pl0\n");
-	t = 0;
-	b = 0;
-	p = 0;
-	s[0] = s[1] = s[2] = 0;
-	do {
-		i = code[p];         //读当前指令
-		p++;
-		switch (i.f)
-		{
-		case fct::lit:        //将a的值取到栈顶
-			s[t] = i.a;
-			t++;
-			break;
-		case fct::opr:        //数字、逻辑运算
-			switch (i.a)
+	int* s = new int[STACK_DEPTH]();      //栈
+	if (s != nullptr) {
+		//memset(s, 0, sizeof(int) * STACK_DEPTH);
+		//this->common_print(L"start pl0\n");
+		t = 0;
+		b = 0;
+		p = 0;
+		s[0] = s[1] = s[2] = 0;
+		do {
+			i = this->code[p];         //读当前指令
+			p++;
+			switch (i.f)
 			{
-			case 0:
-				t = b;
-				p = s[t + 2];
-				b = s[t + 1];
+			case fct::lit:        //将a的值取到栈顶
+				if (t + 1 < STACK_DEPTH)
+				{
+					s[t] = i.a;
+					t++;
+				}
 				break;
-			case 1:
-				s[t - 1] = -(s[t - 1]);
-				break;
-			case 2:
-				t--;
-				s[t - 1] = s[t - 1] + s[t];
-				break;
-			case 3:
-				t--;
-				s[t - 1] = s[t - 1] - s[t];
-				break;
-			case 4:
-				t--;
-				s[t - 1] = s[t - 1] * s[t];
-				break;
-			case 5:
-				t--;
-				s[t - 1] = s[t - 1] / s[t];
-				break;
-			case 6:
-				s[t - 1] = s[t - 1] % 2;
-				break;
-			case 8:
-				t--;
-				s[t - 1] = (s[t - 1] == s[t]);
-				break;
-			case 9:
-				t--;
-				s[t - 1] = (s[t - 1] != s[t]);
-				break;
-			case 10:
-				t--;
-				s[t - 1] = (s[t - 1] < s[t]);
-				break;
-			case 11:
-				t--;
-				s[t - 1] = (s[t - 1] >= s[t]);
-				break;
-			case 12:
-				t--;
-				s[t - 1] = (s[t - 1] > s[t]);
-				break;
-			case 13:
-				t--;
-				s[t - 1] = (s[t - 1] <= s[t]);
-				break;
-			case 14://14号操作为输出栈顶值操作
-				this->common_print(s[t - 1]);//未修改成实型字符型型前
-				t--;//栈顶下移
-				break;
-			case 15://15号操作为输出换行操作
-				this->common_print(L"\n");
-				break;
-			case 16://input from common_input
-				this->common_print(L"?");
-				this->common_input_(s[t]);
+			case fct::opr:        //数字、逻辑运算
+				switch (i.a)
+				{
+				case 0:
+					if (t + 2 < STACK_DEPTH) {
+						t = b;
+						p = s[t + 2];
+						b = s[t + 1];
+					}
+					break;
+				case 1:
+					if (t - 1 > 0) {
+						s[t - 1] = -(s[t - 1]);
+					}
+					break;
+				case 2:
+					if (t - 1 > 0) {
+						t--;
+						s[t - 1] = s[t - 1] + s[t];
+					}
+					break;
+				case 3:
+					if (t - 1 > 0) {
+						t--;
+						s[t - 1] = s[t - 1] - s[t];
+					}
+					break;
+				case 4:
+					if (t - 1 > 0) {
+						t--;
+						s[t - 1] = s[t - 1] * s[t];
+					}
+					break;
+				case 5:
+					if (t - 1 > 0) {
+						t--;
+						s[t - 1] = s[t - 1] / s[t];
+					}
+					break;
+				case 6:
+					if (t - 1 > 0) {
+						s[t - 1] = s[t - 1] % 2;
+					}
+					break;
+				case 8:
+					if (t - 1 > 0) {
+						t--;
+						s[t - 1] = (s[t - 1] == s[t]);
+					}
+					break;
+				case 9:
+					if (t - 1 > 0) {
+						t--;
+						s[t - 1] = (s[t - 1] != s[t]);
+					}
+					break;
+				case 10:
+					if (t - 1 > 0) {
+						t--;
+						s[t - 1] = (s[t - 1] < s[t]);
+					}
+					break;
+				case 11:
+					if (t - 1 > 0) {
+						t--;
+						s[t - 1] = (s[t - 1] >= s[t]);
+					}
+					break;
+				case 12:
+					if (t - 1 > 0) {
+						t--;
+						s[t - 1] = (s[t - 1] > s[t]);
+					}
+					break;
+				case 13:
+					if (t - 1 > 0) {
+						t--;
+						s[t - 1] = (s[t - 1] <= s[t]);
+					}
+					break;
+				case 14://14号操作为输出栈顶值操作
+					if (t - 1 > 0) {
+						this->common_print(s[t - 1]);//未修改成实型字符型型前
+						t--;//栈顶下移
+					}
+					break;
+				case 15://15号操作为输出换行操作
+					this->common_print(L"\n");
+					break;
+				case 16://input from common_input
+					if (t + 1 < STACK_DEPTH) {
+						this->common_print(L"?");
+						this->common_input_(s[t]);
 
-				t++;
-				break;
+						t++;
+					}
+					break;
 
-			case 17://17号操作为输出栈顶值操作
-				this->common_print((wchar_t)s[t - 1]);//输出栈顶值
-				t--;//栈顶下移
-				break;
+				case 17://17号操作为输出栈顶值操作
+					if (t - 1 > 0) {
+						this->common_print((wchar_t)s[t - 1]);//输出栈顶值
+						t--;//栈顶下移
+					}
+					break;
 
-			case 19://19号操作是接受键盘值输入到栈顶
-				this->common_print(L"?");//屏显问号
-				this->common_input_(cm);
-				s[t] = cm;
-				t++;//栈顶上移，分配空间
+				case 19://19号操作是接受键盘值输入到栈顶
+					if (t + 1 < STACK_DEPTH) {
+						this->common_print(L"?");//屏显问号
+						this->common_input_(cm);
+						s[t] = cm;
+						t++;//栈顶上移，分配空间
+					}
+					break;
+				}
 				break;
-			}
-			break;
-		case fct::lod:       //取相对当前过程的数据基地址为ａ的内存的值到栈顶
-			s[t] = s[get_caller(i.l, s, b) + i.a];
-			t++;
-			break;
-		case fct::sto:       //栈顶的值存到相对当前过程的数据基地址为ａ的内存
-			t--;
-			s[get_caller(i.l, s, b) + i.a] = s[t];
-			break;
-		case fct::cal:              //调用子程序
-			s[t] = get_caller(i.l, s, b); //将父过程基地址入栈
-			s[t + 1] = b;           //将本过程基地址入栈，此两项用于base函数
-			s[t + 2] = p;           //将当前指令指针入栈
-			b = t;                //改变基地址指针值为新过程的基地址
-			p = i.a;              //跳转
-			break;
-		case fct::inte:             //分配内存
-			t += i.a;
-			break;
-		case fct::jmp:             //直接跳转
-			p = i.a;
-			break;
-		case fct::jpc:              //条件跳转
-			t--;
-			if (s[t] == 0)
-			{
+			case fct::lod:       //取相对当前过程的数据基地址为ａ的内存的值到栈顶
+				if (t + 1 < STACK_DEPTH) {
+					s[t] = s[get_caller(i.l, s, b) + i.a];
+					t++;
+				}
+				break;
+			case fct::sto:       //栈顶的值存到相对当前过程的数据基地址为ａ的内存
+				if (t - 1 > 0) {
+					t--;
+					s[get_caller(i.l, s, b) + i.a] = s[t];
+				}
+				break;
+			case fct::cal:              //调用子程序
+				if (t + 2 < STACK_DEPTH) {
+					s[t] = get_caller(i.l, s, b); //将父过程基地址入栈
+					s[t + 1] = b;           //将本过程基地址入栈，此两项用于base函数
+					s[t + 2] = p;           //将当前指令指针入栈
+					b = t;                //改变基地址指针值为新过程的基地址
+					p = i.a;              //跳转
+				}
+				break;
+			case fct::inte:             //分配内存
+				if (t + i.a < STACK_DEPTH) {
+					t += i.a;
+				}
+				break;
+			case fct::jmp:             //直接跳转
 				p = i.a;
+				break;
+			case fct::jpc:              //条件跳转
+				if (t > 0) {
+					t--;
+					if (s[t] == 0)
+					{
+						p = i.a;
+					}
+				}
+				break;
 			}
-			break;
-		}
-	} while (p != 0);
+		} while (p != 0);
+
+		delete[] s;
+	}
 }
 //通过过程基址求上1层过程的基址
 int PL0_Compiler::get_caller(int l, int* s, int b)
@@ -1758,25 +1809,4 @@ int PL0_Compiler::get_caller(int l, int* s, int b)
 		l--;
 	}
 	return b1;
-}
-
-std::wstring Convert(std::string text)
-{
-	std::wstring ret;
-
-	wchar_t *pw = new wchar_t[text.length()+1];
-	
-	wmemset(pw, 0, text.length()+1);
-
-	int r = mbstowcs(pw, text.c_str(), (int)text.length());
-	if (r < 0) {
-		setlocale(LC_ALL, "");
-		r = mbstowcs(pw, text.c_str(), (int)text.length());
-	}
-	if (r >= 0) {
-		ret = pw;
-	}
-	delete[] pw;
-
-	return ret;
 }

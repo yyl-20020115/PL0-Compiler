@@ -3,8 +3,6 @@
 #include <vector>
 #include <fstream>
 
-std::wstring Convert(std::string text);
-
 class PL0_Compiler
 {
 public:
@@ -12,7 +10,7 @@ public:
 	static const int MNEMONIC_COUNT = 8;
 	static const int KEYWORDS_COUNT = 19;
 	static const int MAX_ADDRESS = 4095;
-	static const int STACK_DEPTH = 1024;
+	static const int STACK_DEPTH = 65536;
 
 public:
 	enum class symbol

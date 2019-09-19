@@ -5,18 +5,15 @@
 int wmain(int argc, wchar_t** argv)
 {
 	std::wstring fn;
-	if (argc >= 2) {
-		fn = argv[1];
-	}
+
 #else
 int main(int argc, char** argv)
 {
 	std::string fn;
+#endif
 	if (argc >= 2) {
 		fn = argv[1];
 	}
-#endif
-
 	//fn is the pl0 filename
 	if(fn.size() == 0)
 	{
