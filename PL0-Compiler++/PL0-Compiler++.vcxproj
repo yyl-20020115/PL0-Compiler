@@ -158,7 +158,11 @@
     <ClInclude Include="PL0-Compiler++.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="gcd.pl0">
+      <FileType>Document</FileType>
+    </None>
     <None Include="PL0.BNF" />
+    <None Include="test.pl0" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

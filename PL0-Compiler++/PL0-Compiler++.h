@@ -8,6 +8,11 @@ std::wstring Convert(std::string text);
 class PL0_Compiler
 {
 public:
+	static const int SYMBOLS_COUNT = 256;
+	static const int MAX_ADDRESS = 4095;
+	static const int STACK_DEPTH = 1024;
+
+public:
 	enum class symbol
 	{
 		nul = 0, ident, number, plus, minus,
@@ -58,9 +63,6 @@ public:
 		int adr;                                  //地址，仅const不使用
 		int size;                                 //需要分配的数据区空间，仅procedure使用
 	};
-	static const int SYMBOLS_COUNT = 256;
-	static const int MAX_ADDRESS = 4095;
-	static const int STACK_DEPTH = 1024;
 protected:
 	symbol ssym[SYMBOLS_COUNT];
 	symbol wsym[SYMBOLS_COUNT];

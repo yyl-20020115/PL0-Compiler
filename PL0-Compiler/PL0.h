@@ -47,10 +47,10 @@ struct instruction
 	//double a;//实型字符型修改
 };
 
-FILE* fas;
-FILE* fa;
-FILE* fa1;
-FILE* fa2;
+FILE* f_table;
+FILE* f_assembly;
+FILE* f_locations;
+FILE* f_result;
 
 bool tableswitch;
 bool listswitch;

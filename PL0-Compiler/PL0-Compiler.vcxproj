@@ -161,12 +161,12 @@
     <ClInclude Include="PL0.h" />
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="test.pl0">
+    <None Include="test.pl0">
       <FileType>Document</FileType>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="gcd.pl0">
+    </None>
+    <None Include="gcd.pl0">
       <FileType>Document</FileType>
-    </CopyFileToFolders>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

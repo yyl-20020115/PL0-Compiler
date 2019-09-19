@@ -4,10 +4,10 @@ A.2 C 版   本
 *运行后输入PL/0 源程序文件名
 *回答是否输出虚拟机代码
 *回答是否输出名字表
-*fa.tmp 输出虚拟机代码
-*fa1.tmp  输出源文件及其各行对应的首地址
-*fa2.tmp  输出结果
-*fas.tmp  输出名字表
+*assembly.txt 输出虚拟机代码
+*locations.txt  输出源文件及其各行对应的首地址
+*result.txt  输出结果
+*table.txt  输出名字表
 *     @author:zzh
 */
 #ifdef _WIN32
@@ -37,40 +37,40 @@ int main()
 		//tableswitch = (fname[0] == 'y' || fname[0] == 'Y');
 		listswitch = true;
 		tableswitch = true;
-		fa1 = fopen("fa1.tmp", "w");
-		fprintf(fa1, "%s\n", fname);
+		f_locations = fopen("locations.txt", "w");
+		fprintf(f_locations, "%s\n", fname);
 		init(); /*初始化*/
 		err = 0;
 		cc = cx = ll = 0;
 		ch = ' ';
 		if (-1 != getsym())
 		{
-			fa = fopen("fa.tmp", "w");
-			fas = fopen("fas.tmp", "w");
+			f_assembly = fopen("assembly.txt", "w");
+			f_table = fopen("table.txt", "w");
 			addset(nxtlev, declbegsys, statbegsys, NSYMBOLS);
 			nxtlev[(int)symbol::period] = true;
 			if (-1 == block(0, 0, nxtlev))  //compile program
 			{
-				fclose(fa);
-				fclose(fa1);
-				fclose(fas);
+				fclose(f_assembly);
+				fclose(f_locations);
+				fclose(f_table);
 				fclose(fin);
 				printf("\n");
 				return 0;
 			}
-			fclose(fa);
-			fclose(fa1);
-			fclose(fas);
+			fclose(f_assembly);
+			fclose(f_locations);
+			fclose(f_table);
 			if (sym != symbol::period)
 			{
 				error(9);
 			}
 			if (err == 0)
 			{
-				fa2 = fopen("fa2.tmp", "w");
+				f_result = fopen("result.txt", "w");
 				//run program
 				interpret();
-				fclose(fa2);
+				fclose(f_result);
 			}
 			else
 			{
@@ -250,7 +250,7 @@ int getch()
 		ll = 0;
 		cc = 0;
 		printf("%d ", cx);
-		fprintf(fa1, "%d ", cx);
+		fprintf(f_locations, "%d ", cx);
 		ch = ' ';
 		while (ch != 10)
 		{
@@ -261,12 +261,12 @@ int getch()
 				break;
 			}
 			printf("%c", ch);
-			fprintf(fa1, "%c", ch);
+			fprintf(f_locations, "%c", ch);
 			line[ll] = ch;
 			ll++;
 		}
 		printf("\n");
-		fprintf(fa1, "\n");
+		fprintf(f_locations, "\n");
 	}
 	ch = line[cc];
 	cc++;
@@ -700,20 +700,20 @@ int block(int lev, int tx, bool* fsys)
 			case object::constant:
 				printf("%d const %s", i, table[i].name);
 				printf("val=%d\n", table[i].val);
-				fprintf(fas, "%d const %s", i, table[i].name);
-				fprintf(fas, "val=%d\n", table[i].val);
+				fprintf(f_table, "%d const %s ", i, table[i].name);
+				fprintf(f_table, "val=%d\n", table[i].val);
 				break;
 			case object::variable:
-				printf("%d var%s", i, table[i].name);
+				printf("%d var %s ", i, table[i].name);
 				printf("lev=%d addr=%d\n", table[i].level, table[i].adr);
-				fprintf(fas, "%d var %s", i, table[i].name);
-				fprintf(fas, "lev=%d addr=%d\n", table[i].level, table[i].adr);
+				fprintf(f_table, "%d var %s ", i, table[i].name);
+				fprintf(f_table, "lev=%d addr=%d\n", table[i].level, table[i].adr);
 				break;
 			case object::procedur:
-				printf("%d proc%s", i, table[i].name);
+				printf("%d proc %s ", i, table[i].name);
 				printf("lev=%d addr=%d size=%d\n", table[i].level, table[i].adr, table[i].size);
-				fprintf(fas, "%d proc%s", i, table[i].name);
-				fprintf(fas, "lev=%d adr=%d size=%d \n", table[i].level, table[i].adr, table[i].size);
+				fprintf(f_table, "%d proc %s ", i, table[i].name);
+				fprintf(f_table, "lev=%d adr=%d size=%d\n", table[i].level, table[i].adr, table[i].size);
 				break;
 			}
 		}
@@ -887,7 +887,7 @@ void listcode(int cx0)
 		for (i = cx0; i < cx; i++)
 		{
 			printf("%d %s %d %d\n", i, mnemonic[(int)code[i].f], code[i].l, code[i].a);
-			fprintf(fa, "%d %s %d %d\n", i, mnemonic[(int)code[i].f], code[i].l, code[i].a);
+			fprintf(f_assembly, "%d %s %d %d\n", i, mnemonic[(int)code[i].f], code[i].l, code[i].a);
 		}
 	}
 }
@@ -1743,7 +1743,7 @@ void interpret()
 				break;
 			case 14://14号操作为输出栈顶值操作
 				printf("%d", s[t - 1]);//未修改成实型字符型型前
-				fprintf(fa2, "%d", s[t - 1]);
+				fprintf(f_result, "%d", s[t - 1]);
 
 				//printf("%d",(int)s[t-1]);//输出栈顶值，强制转换类型
 				//fprintf(fa2,"%lf\n",s[t-1]);//同时打印到文件
@@ -1752,13 +1752,13 @@ void interpret()
 				break;
 			case 15://15号操作为输出换行操作
 				printf("\n");
-				fprintf(fa2, "\n");
+				fprintf(f_result, "\n");
 				break;
 			case 16:
 				printf("?");
-				fprintf(fa2, "?");
+				fprintf(f_result, "?");
 				scanf("%d", &(s[t]));
-				fprintf(fa2, "%d\n", s[t]);
+				fprintf(f_result, "%d\n", s[t]);
 
 				//printf("输入整型数:");
 				//fprintf(fa2,"输入整型数:");
@@ -1771,7 +1771,7 @@ void interpret()
 			case 17://17号操作为输出栈顶值操作
 				printf("输出字符:");
 				printf("%c\n", s[t - 1]);//输出栈顶值
-				fprintf(fa2, "%c\n", s[t - 1]);//同时打印到文件
+				fprintf(f_result, "%c\n", s[t - 1]);//同时打印到文件
 				t--;//栈顶下移
 				break;
 
@@ -1783,14 +1783,14 @@ void interpret()
 
 			case 19://19号操作是接受键盘值输入到栈顶
 				printf("输入单字符:");//屏显问号
-				fprintf(fa2, "输入单字符:");//同时输出到文件
+				fprintf(f_result, "输入单字符:");//同时输出到文件
 				getchar();//消除输入的enter
 				scanf("%c", &cm);
 				s[t] = cm;
 				//scanf("%s",sta);
 				//s[t]=sta[0];//获得输入
 
-				fprintf(fa2, "%c\n", s[t]);//把用户输入值打印到文件
+				fprintf(f_result, "%c\n", s[t]);//把用户输入值打印到文件
 				t++;//栈顶上移，分配空间
 				break;
 

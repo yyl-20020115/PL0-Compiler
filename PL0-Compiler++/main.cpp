@@ -18,24 +18,27 @@ int main(int argc, char** argv)
 #endif
 
 	//fn is the pl0 filename
-	
-
-	PL0_Compiler* compiler = new PL0_Compiler();
-	
-	std::wifstream fs(fn);
-
-	if (fs) {
-		compiler->SetCommonInput(&std::wcin);
-		compiler->SetCommonOutput(&std::wcout);
-		compiler->SetErrorOutput(&std::wcerr);
-
-		compiler->SetSourceInput(&fs);
-		
-		compiler->Execute();
+	if(fn.size() == 0)
+	{
+		std::wcout << L"Usage: PL0-Compiler++ <FileName.PL0>" << std::endl;
 	}
-	
-	delete compiler;
+	else 
+	{
+		PL0_Compiler* compiler = new PL0_Compiler();
 
+		std::wifstream fs(fn);
+
+		if (fs) {
+			compiler->SetCommonInput(&std::wcin);
+			compiler->SetCommonOutput(&std::wcout);
+			compiler->SetErrorOutput(&std::wcerr);
+			compiler->SetSourceInput(&fs);
+
+			compiler->Execute();
+		}
+
+		delete compiler;
+	}
 	return 0;
 }
 

@@ -235,17 +235,18 @@ int PL0_Compiler::getch()
 	{
 		if (this->source_input->eof())
 		{
-			this->common_print(L"Program terminated");
+			this->common_print(L"Program incomplete!");
 			return -1;
 		}
 		this->ll = 0;
 		this->cc = 0;
 		this->ch = L' ';
+		this->line.clear();
 		while (this->ch != L'\n')
 		{
-			*this->source_input >> ch;
+			this->source_input->get(ch);
 
-			if (this->ch == -1)
+			if (this->source_input->eof())
 			{
 				break;
 			}
@@ -255,8 +256,8 @@ int PL0_Compiler::getch()
 		}
 		this->common_print('\n');
 	}
-	this->ch = this->line[cc];
-	cc++;
+	this->ch = this->line[this->cc];
+	this->cc++;
 	return 0;
 }
 
@@ -305,41 +306,36 @@ void PL0_Compiler::error_print(const wchar_t* s)
 //词法分析，获取一个符号
 int PL0_Compiler::getsym()
 {
-	int i = 0, j = 0, k = 0;
+	int i = 0, j = -1;
 	while (this->ch == L' '
-		|| this->ch == 10
-		|| this->ch == 9)
+		|| this->ch == L'\n'
+		|| this->ch == L'\t')
 	{
 		if (-1 == getch())return -1;
 	}
 	if (ch >= L'a' && ch <= L'z')
 	{
-		k = 0;
 		do {
-			a += ch;
-			k++;
+			this->a += ch;
 
 			if (-1 == getch())return -1;
-		} while (ch >= 'a' && ch <= 'z' || ch >= '0' && ch <= '9');
-		//
-		//a[k] = 0;
-		//strcpy(id, a);
-		//i = 0;
-		//j = NKEYWORDS - 1;
-		//do {
-		//	k = (i + j) / 2;
-		//	if (strcmp(id, word[k]) <= 0)
-		//	{
-		//		j = k - 1;
-		//	}
-		//	if (strcmp(id, word[k]) >= 0)
-		//	{
-		//		i = k + 1;
-		//	}
-		//} while (i <= j);
-		if (i - 1 > j)
+		} while (this->ch >= L'a' && this->ch <= L'z' || this->ch >= L'0' && this->ch <= L'9');
+
+		this->id = a;
+		a.clear();
+
+		for (i = 0; i < SYMBOLS_COUNT; i++) {
+			if (this->word[i].empty()) {
+				break;
+			}
+			else if(this->word[i] == this->id){
+				j = i;
+				break;
+			}
+		}
+		if (j>=0)
 		{
-			sym = wsym[k];
+			sym = wsym[j];
 		}
 		else
 		{
@@ -350,15 +346,12 @@ int PL0_Compiler::getsym()
 	{
 		if (this->ch >= L'0' && this->ch <= L'9')
 		{
-			k = 0;
 			num = 0;
 			sym = symbol::number;
 			do {
 				num = 10 * num + ch - L'0';
-				k++;
 				if (-1 == getch())return -1;
 			} while (this->ch >= L'0' && this->ch <= L'9'); //获取数字的值
-			k--;
 		}
 		else
 		{
@@ -573,6 +566,7 @@ int PL0_Compiler::compile(int lev, int tx, bool* fsys)
 									//集合，开辟新的空间传递给下级函数
 	dx = 3;
 	tx0 = tx;                         //记录本层名字的初始位置
+	table.push_back(tablestruct());
 	table[tx].adr = cx;
 	if (-1 == gen(fct::jmp, 0, 0)) return -1;
 	//if (lev > MAX_NEST_CALLING_LEVEL)
@@ -676,7 +670,7 @@ int PL0_Compiler::compile(int lev, int tx, bool* fsys)
 			}
 			else
 			{
-				error(5);                       //漏掉了分号
+				error(5); //漏掉了分号
 			}
 		}
 		memcpy(nxtlev, statbegsys, sizeof(bool) * SYMBOLS_COUNT);
