@@ -15,7 +15,7 @@ A.2 C 版   本
 #endif
 
 #include <stdio.h>
-#include "pl0.h"
+#include "PL0.h"
 #include "string.h"
 /*解释执行时使用的栈*/
 
