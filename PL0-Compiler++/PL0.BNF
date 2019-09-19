@@ -1,0 +1,110 @@
+Program:
+	Subprogram "."
+
+Subprogram:
+	ConstPart? VarPart? ProcPart? Statement
+
+ConstPart:
+	"const" ConstDefs ";"
+
+ConstDefs:
+	ConstDef
+	ConstDefs "," ConstDef
+
+ConstDef:
+	Identifier "=" Integer
+
+VarPart:
+	"var" Identifiers ";"
+
+Identifiers:
+	Identifier
+	Identifiers "," Identifier
+
+ProcPart:
+	ProcLine
+	ProcPart ProcLine
+
+ProcLine:
+	ProcHead Subprogram ";"
+
+ProcHead:
+	"procedure" Identifier ";"
+
+Statement:
+	AssignmentStatement
+	ConditionStatment
+	WhileLoopStatement
+	CallStatement
+	ReadStatement
+	WriteStatement
+	CompondStatement
+	EmptyStatement
+
+AssignmentStatment:
+	Identifier ":=" Expression ";"
+
+CompoundStatement:
+	"begin" Statements "end"
+
+Statements
+	Statement
+	Statements Statement
+
+EmptyStatement:
+	";"
+	
+Condition:
+	Expression Relationship Expression
+	"odd" Expression
+
+Expression:
+	"+" Term
+	"-" Term
+	Expression "+" Term
+	Expression "-" Term
+
+Term:
+	Factor
+	Term "*" Factor
+	Term "/" Factor
+
+Factor:
+	Identifier
+	Integer
+	"(" Expression ")"
+
+Relationship:
+	"="
+	"#"
+	"<"
+	"<="
+	">"
+	">="
+
+ConditionStatement:
+	"if" Condition "then" Statement ";"
+
+CallStatement:
+	"call" Identifier
+
+WhileLoopStatement:
+	"while" Condition "do" Statement ";"
+
+ReadStatement:
+	"read" "(" Identifeirs ")" ";"
+
+WriteStatement:
+	"write" "(" Expressions ")" ";"
+
+Expressions:
+	Expression
+	Expressions "," Expression
+
+Identifier:
+	#TODO
+
+Integer:
+	#TODO
+
+	 
