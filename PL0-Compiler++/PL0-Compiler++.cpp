@@ -159,6 +159,8 @@ void PL0_Compiler::Reset()
 	this->error_count = 0;
 	this->id.clear();
 	this->a.clear();
+	this->table.clear();
+	this->code.clear();
 }
 void PL0_Compiler::Execute()
 {
@@ -260,7 +262,6 @@ int PL0_Compiler::getch()
 	this->cc++;
 	return 0;
 }
-
 void PL0_Compiler::common_print(wchar_t c)
 {
 	if (this->common_output != nullptr) {
@@ -316,13 +317,13 @@ int PL0_Compiler::getsym()
 	if (ch >= L'a' && ch <= L'z')
 	{
 		do {
-			this->a += ch;
+			this->a += this->ch;
 
 			if (-1 == getch())return -1;
 		} while (this->ch >= L'a' && this->ch <= L'z' || this->ch >= L'0' && this->ch <= L'9');
 
-		this->id = a;
-		a.clear();
+		this->id = this->a;
+		this->a.clear();
 
 		for (i = 0; i < SYMBOLS_COUNT; i++) {
 			if (this->word[i].empty()) {
@@ -335,7 +336,7 @@ int PL0_Compiler::getsym()
 		}
 		if (j>=0)
 		{
-			sym = wsym[j];
+			sym = this->wsym[j];
 		}
 		else
 		{
@@ -350,18 +351,18 @@ int PL0_Compiler::getsym()
 			sym = symbol::number;
 			do {
 				num = 10 * num + ch - L'0';
-				if (-1 == getch())return -1;
+				if (-1 == this->getch())return -1;
 			} while (this->ch >= L'0' && this->ch <= L'9'); //获取数字的值
 		}
 		else
 		{
-			if (ch == L':') //检测赋值符号
+			if (this->ch == L':') //检测赋值符号
 			{
-				if (-1 == getch())return -1;
-				if (ch == L'=')
+				if (-1 == this->getch())return -1;
+				if (this->ch == L'=')
 				{
 					sym = symbol::becomes;
-					if (-1 == getch())return -1;
+					if (-1 == this->getch())return -1;
 				}
 				else
 				{
@@ -372,17 +373,17 @@ int PL0_Compiler::getsym()
 			{
 				if (this->ch == L'<') //检测小于或小于等于符号
 				{
-					if (-1 == getch())return -1;
+					if (-1 == this->getch())return -1;
 					if (this->ch == L'=')
 					{
 						sym = symbol::leq;
-						if (-1 == getch())return -1;
+						if (-1 == this->getch())return -1;
 					}
 					//增加不等号语法分析
 					else if (this->ch == '>') //小于号后面跟着大于号
 					{
 						sym = symbol::neq; //构成不等号<>
-						if (-1 == getch())return -1;
+						if (-1 == this->getch())return -1;
 					}
 					else
 					{
@@ -393,11 +394,11 @@ int PL0_Compiler::getsym()
 				{
 					if (this->ch == L'>')          //检测大于或大于等于符号
 					{
-						if (-1 == getch())return -1;
+						if (-1 == this->getch())return -1;
 						if (this->ch == L'=')
 						{
 							sym = symbol::geq;
-							if (-1 == getch())return -1;
+							if (-1 == this->getch())return -1;
 						}
 						else
 						{
@@ -406,36 +407,36 @@ int PL0_Compiler::getsym()
 					}
 					else if (this->ch == L'*')
 					{
-						if (-1 == getch())return -1;
+						if (-1 == this->getch())return -1;
 						if (this->ch == L'=')
 						{
 							sym = symbol::timeseql;//构成*=号
-							if (-1 == getch())return -1;
+							if (-1 == this->getch())return -1;
 						}
 						else
 						{
 							sym = symbol::times;
 						}
 					}
-					else if (this->ch == '/')
+					else if (this->ch == L'/')
 					{
-						if (-1 == getch())return -1;
-						if (this->ch == '=')
+						if (-1 == this->getch())return -1;
+						if (this->ch == L'=')
 						{
 							sym = symbol::slasheql;//构成/=号
-							if (-1 == getch())return -1;
+							if (-1 == this->getch())return -1;
 						}
-						else if (this->ch == '*')//增加注释功能
+						else if (this->ch == L'*')//增加注释功能
 						{
 							int end = 1;
-							char a = 0, b = 0;
-							if (-1 == getch())return -1;
+							wchar_t a = 0, b = 0;
+							if (-1 == this->getch())return -1;
 							this->common_print(ch);
 							while (end)
 							{
 								if (b != 0) { b = a; }
 								else b = this->ch;
-								if (-1 == getch())return -1;
+								if (-1 == this->getch())return -1;
 								a = this->ch;
 
 								this->common_print(a);
@@ -446,30 +447,30 @@ int PL0_Compiler::getsym()
 									break;
 								}
 							}
-							if (-1 == getch())return -1;
+							if (-1 == this->getch())return -1;
 						}
 						else
 						{
 							sym = symbol::slash;
 						}
 					}
-					else if (ch == '+')
+					else if (this->ch == L'+')
 					{
-						if (-1 == getch())return -1;
-						if (ch == '+')
+						if (-1 == this->getch())return -1;
+						if (this->ch == L'+')
 						{
 							sym = symbol::plusplus;//
-							if (-1 == getch())return -1;
+							if (-1 == this->getch())return -1;
 						}
 						else
 						{
 							sym = symbol::plus;
 						}
 					}
-					else if (ch == '-')
+					else if (this->ch == L'-')
 					{
-						if (-1 == getch())return -1;
-						if (ch == '-')
+						if (-1 == this->getch())return -1;
+						if (this->ch == L'-')
 						{
 							sym = symbol::minusminus;//
 							if (-1 == getch())return -1;
@@ -479,14 +480,14 @@ int PL0_Compiler::getsym()
 							sym = symbol::minus;
 						}
 					}
-					else if (ch == '\'')//
+					else if (this->ch == L'\'')//
 					{
-						if (-1 == getch())return -1;
-						if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z'))
+						if (-1 == this->getch())return -1;
+						if ((this->ch >= L'a' && this->ch <= L'z') || (this->ch >= L'A' && this->ch <= L'Z'))
 						{
 							num = (int)ch;
-							if (-1 == getch())return -1;
-							if (ch == '\'')
+							if (-1 == this->getch())return -1;
+							if (ch == L'\'')
 								sym = symbol::charsym;
 							else
 							{
@@ -496,16 +497,16 @@ int PL0_Compiler::getsym()
 							}
 						}
 						else error(39); //
-						if (-1 == getch())return -1;
+						if (-1 == this->getch())return -1;
 					}
 					else
 					{
-						sym = ssym[ch];// 当符号不满足上述条件时，全部按照单字符号处理
+						this->sym = this->ssym[this->ch];// 当符号不满足上述条件时，全部按照单字符号处理
 						//if(-1==getch())return -1;
 						//richard
-						if (sym != symbol::period)
+						if (this->sym != symbol::period)
 						{
-							if (-1 == getch())return -1;
+							if (-1 == this->getch())return -1;
 						}
 						//end richard
 					}
@@ -566,7 +567,9 @@ int PL0_Compiler::compile(int lev, int tx, bool* fsys)
 									//集合，开辟新的空间传递给下级函数
 	dx = 3;
 	tx0 = tx;                         //记录本层名字的初始位置
-	table.push_back(tablestruct());
+	if (table.size() <= tx0) {
+		table.push_back(tablestruct());
+	}
 	table[tx].adr = cx;
 	if (-1 == gen(fct::jmp, 0, 0)) return -1;
 	//if (lev > MAX_NEST_CALLING_LEVEL)
@@ -727,6 +730,9 @@ int PL0_Compiler::compile(int lev, int tx, bool* fsys)
 void PL0_Compiler::enter(otype k, int* ptx, int lev, int* pdx)
 {
 	(*ptx)++;
+	if (table.size() <= *ptx) {
+		table.push_back(tablestruct());
+	}
 	table[(*ptx)].name = id;       //全局变量id中已存有当前名字的名字
 	table[(*ptx)].kind = k;
 	switch (k)
