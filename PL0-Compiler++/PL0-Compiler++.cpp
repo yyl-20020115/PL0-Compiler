@@ -62,10 +62,10 @@ std::wostream* PL0_Compiler::GetErrorOutput()
 }
 void PL0_Compiler::Reset()
 {
-	for (int i = 0; i < SYMBOLS_COUNT; i++) {
+	for (int i = 0; i < 256; i++) {
 		this->ssym[i] = symbol::nul;
 	}
-	for (int i = 0; i < SYMBOLS_COUNT; i++) {
+	for (int i = 0; i < KEYWORDS_COUNT; i++) {
 		this->wsym[i] = symbol::nul;
 	}
 	this->ssym[L'+'] = symbol::plus;
@@ -99,25 +99,25 @@ void PL0_Compiler::Reset()
 	this->wsym[16] = symbol::varsym;
 	this->wsym[17] = symbol::whilesym;
 	this->wsym[18] = symbol::writesym;
-	this->word[0] = L"begin";
-	this->word[1] = L"call";
-	this->word[2] = L"char";//增加保留字char
-	this->word[3] = L"const";
-	this->word[4] = L"do";
-	this->word[5] = L"downto";//增加保留字downto
-	this->word[6] = L"else";//增加保留字else
-	this->word[7] = L"end";
-	this->word[8] = L"for";//增加保留字for
-	this->word[9] = L"if";
-	this->word[10] = L"odd";
-	this->word[11] = L"procedure";
-	this->word[12] = L"read";
-	this->word[13] = L"return";//增加保留字return
-	this->word[14] = L"then";
-	this->word[15] = L"to";//增加保留字to
-	this->word[16] = L"var";
-	this->word[17] = L"while";
-	this->word[19] = L"write";
+	this->keywords[0] = L"begin";
+	this->keywords[1] = L"call";
+	this->keywords[2] = L"char";//增加保留字char
+	this->keywords[3] = L"const";
+	this->keywords[4] = L"do";
+	this->keywords[5] = L"downto";//增加保留字downto
+	this->keywords[6] = L"else";//增加保留字else
+	this->keywords[7] = L"end";
+	this->keywords[8] = L"for";//增加保留字for
+	this->keywords[9] = L"if";
+	this->keywords[10] = L"odd";
+	this->keywords[11] = L"procedure";
+	this->keywords[12] = L"read";
+	this->keywords[13] = L"return";//增加保留字return
+	this->keywords[14] = L"then";
+	this->keywords[15] = L"to";//增加保留字to
+	this->keywords[16] = L"var";
+	this->keywords[17] = L"while";
+	this->keywords[18] = L"write";
 
 	this->mnemonic[(int)fct::lit] = L"lit";
 	this->mnemonic[(int)fct::opr] = L"opr";
@@ -167,7 +167,7 @@ void PL0_Compiler::Execute()
 	this->Reset();
 
 	bool nxtlev[SYMBOLS_COUNT] = { false };
-
+	this->ch = L' ';
 	if (-1 != getsym())
 	{
 		this->addset(nxtlev, declbegsys, statbegsys, SYMBOLS_COUNT);
@@ -224,7 +224,7 @@ void PL0_Compiler::error(int n)
 {
 	if (this->error_output != nullptr)
 	{
-		*this->error_output << L"error(" << n << L") = '" << ch << L"'" << std::endl;
+		*this->error_output << L"error(" << n << L") = '" << this->ch << L"'" << std::endl;
 	}
 	this->error_count++;
 }
@@ -256,7 +256,7 @@ int PL0_Compiler::getch()
 			this->line += this->ch;
 			this->ll++;
 		}
-		this->common_print('\n');
+		this->common_print(L'\n');
 	}
 	this->ch = this->line[this->cc];
 	this->cc++;
@@ -314,7 +314,7 @@ int PL0_Compiler::getsym()
 	{
 		if (-1 == getch())return -1;
 	}
-	if (ch >= L'a' && ch <= L'z')
+	if (this->ch >= L'a' && this->ch <= L'z')
 	{
 		do {
 			this->a += this->ch;
@@ -326,10 +326,10 @@ int PL0_Compiler::getsym()
 		this->a.clear();
 
 		for (i = 0; i < SYMBOLS_COUNT; i++) {
-			if (this->word[i].empty()) {
+			if (this->keywords[i].empty()) {
 				break;
 			}
-			else if(this->word[i] == this->id){
+			else if(this->keywords[i] == this->id){
 				j = i;
 				break;
 			}
@@ -786,7 +786,7 @@ int PL0_Compiler::constdeclaration(int* ptx, int lev, int* pdx)
 		{
 			if (sym == symbol::becomes)
 			{
-				error(1);                     //把=写出成了：=
+				error(1);                     //把=写出成了:=
 			}
 			if (-1 == getsym())return -1;
 			if (sym == symbol::number)

@@ -39,6 +39,9 @@ int main(int argc, char** argv)
 
 		delete compiler;
 	}
+	getchar();
+	getchar();
+
 	return 0;
 }
 

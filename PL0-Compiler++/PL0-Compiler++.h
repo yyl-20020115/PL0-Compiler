@@ -8,7 +8,9 @@ std::wstring Convert(std::string text);
 class PL0_Compiler
 {
 public:
-	static const int SYMBOLS_COUNT = 256;
+	static const int SYMBOLS_COUNT = 42;
+	static const int MNEMONIC_COUNT = 8;
+	static const int KEYWORDS_COUNT = 19;
 	static const int MAX_ADDRESS = 4095;
 	static const int STACK_DEPTH = 1024;
 
@@ -64,10 +66,10 @@ public:
 		int size;                                 //需要分配的数据区空间，仅procedure使用
 	};
 protected:
-	symbol ssym[SYMBOLS_COUNT];
-	symbol wsym[SYMBOLS_COUNT];
-	std::wstring word[SYMBOLS_COUNT];
-	std::wstring mnemonic[SYMBOLS_COUNT];
+	symbol ssym[256];
+	symbol wsym[KEYWORDS_COUNT];
+	std::wstring keywords[KEYWORDS_COUNT];
+	std::wstring mnemonic[MNEMONIC_COUNT];
 
 	bool declbegsys[SYMBOLS_COUNT];
 	bool statbegsys[SYMBOLS_COUNT];

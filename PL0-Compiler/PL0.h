@@ -24,7 +24,7 @@ enum class symbol
 	returnsym, timeseql, slasheql, plusplus, minusminus,
 	charsym,
 };
-#define NSYMBOLS 42    //符号数初始值由32增加至42
+#define SYMBOLS_COUNT 42    //符号数初始值由32增加至42
 /*-------------*/
 enum class object {
 	constant,
@@ -37,7 +37,7 @@ enum class object {
 enum class fct {
 	lit, opr, lod, sto, cal, inte, jmp, jpc,
 };
-#define fctnum 8
+#define MNEMONIC_COUNT 8
 /*--------------*/
 struct instruction
 {
@@ -66,10 +66,10 @@ struct instruction code[MAX_PCODE_LENGTH];
 char word[NKEYWORDS][MAX_SYMBOL_CHARS];
 enum symbol wsym[NKEYWORDS];
 enum symbol ssym[256];
-char mnemonic[fctnum][5];
-bool declbegsys[NSYMBOLS];
-bool statbegsys[NSYMBOLS];
-bool facbegsys[NSYMBOLS];
+char mnemonic[MNEMONIC_COUNT][5];
+bool declbegsys[SYMBOLS_COUNT];
+bool statbegsys[SYMBOLS_COUNT];
+bool facbegsys[SYMBOLS_COUNT];
 /*------------------------------*/
 struct tablestruct
 {

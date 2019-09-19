@@ -23,7 +23,7 @@ A.2 C 版   本
 
 int main()
 {
-	bool nxtlev[NSYMBOLS] = { false };
+	bool nxtlev[SYMBOLS_COUNT] = { false };
 	printf("Input pl/0 file ?");
 	scanf("%s", fname);                                     /*输入文件名*/
 	fin = fopen(fname, "r");
@@ -47,7 +47,7 @@ int main()
 		{
 			f_assembly = fopen("assembly.txt", "w");
 			f_table = fopen("table.txt", "w");
-			addset(nxtlev, declbegsys, statbegsys, NSYMBOLS);
+			addset(nxtlev, declbegsys, statbegsys, SYMBOLS_COUNT);
 			nxtlev[(int)symbol::period] = true;
 			if (-1 == block(0, 0, nxtlev))  //compile program
 			{
@@ -161,7 +161,7 @@ void init()
 	strcpy(&(mnemonic[(int)fct::jpc][0]), "jpc");
 
 	/*设置符号集*/
-	for (i = 0; i < NSYMBOLS; i++)
+	for (i = 0; i < SYMBOLS_COUNT; i++)
 	{
 		declbegsys[i] = false;
 		statbegsys[i] = false;
@@ -563,7 +563,7 @@ int block(int lev, int tx, bool* fsys)
 	int dx;                         /*名字分配到的相对地址*/
 	int tx0;                        /*保留初始tx*/
 	int cx0;                        /*保留初始cx*/
-	bool nxtlev[NSYMBOLS];            /*在下级函数的参数中，符号集合均为值参，但由于使用数组
+	bool nxtlev[SYMBOLS_COUNT];            /*在下级函数的参数中，符号集合均为值参，但由于使用数组
 									  实现，传递进来的是指针，为防止下级函数改变上级函数的
 									  集合，开辟新的空间传递给下级函数*/
 	dx = 3;
@@ -656,7 +656,7 @@ int block(int lev, int tx, bool* fsys)
 			{
 				error(5);/*漏掉了分号*/
 			}
-			memcpy(nxtlev, fsys, sizeof(bool) * NSYMBOLS);
+			memcpy(nxtlev, fsys, sizeof(bool) * SYMBOLS_COUNT);
 			nxtlev[(int)symbol::semicolon] = true;
 			if (-1 == block(lev + 1, tx, nxtlev))
 			{
@@ -665,7 +665,7 @@ int block(int lev, int tx, bool* fsys)
 			if (sym == symbol::semicolon)
 			{
 				getsymdo;
-				memcpy(nxtlev, statbegsys, sizeof(bool) * NSYMBOLS);
+				memcpy(nxtlev, statbegsys, sizeof(bool) * SYMBOLS_COUNT);
 				nxtlev[(int)symbol::ident] = true;
 				nxtlev[(int)symbol::procsym] = true;
 				testdo(nxtlev, fsys, 6);
@@ -675,7 +675,7 @@ int block(int lev, int tx, bool* fsys)
 				error(5);                       /*漏掉了分号*/
 			}
 		}
-		memcpy(nxtlev, statbegsys, sizeof(bool) * NSYMBOLS);
+		memcpy(nxtlev, statbegsys, sizeof(bool) * SYMBOLS_COUNT);
 		nxtlev[(int)symbol::ident] = true;
 		nxtlev[(int)symbol::period] = true;
 		testdo(nxtlev, declbegsys, 7);
@@ -720,12 +720,12 @@ int block(int lev, int tx, bool* fsys)
 		printf("\n");
 	}
 	/*语句后跟符号为分号或end*/
-	memcpy(nxtlev, fsys, sizeof(bool) * NSYMBOLS);/*每个后跟符号集和都包含上层后跟符号集和，以便补救*/
+	memcpy(nxtlev, fsys, sizeof(bool) * SYMBOLS_COUNT);/*每个后跟符号集和都包含上层后跟符号集和，以便补救*/
 	nxtlev[(int)symbol::semicolon] = true;
 	nxtlev[(int)symbol::endsym] = true;
 	statementdo(nxtlev, &tx, lev);
 	gendo(fct::opr, 0, 0); /*每个过程出口都要使用的释放数据段命令*/
-	memset(nxtlev, 0, sizeof(bool) * NSYMBOLS); /*分程序没有补救集合*/
+	memset(nxtlev, 0, sizeof(bool) * SYMBOLS_COUNT); /*分程序没有补救集合*/
 	test(fsys, nxtlev, 8);                  /*检测后跟符号正确性*/
 	listcode(cx0);                        /*输出代码*/
 	return 0;
@@ -897,7 +897,7 @@ void listcode(int cx0)
 int statement(bool* fsys, int* ptx, int lev)
 {
 	int i, cx1, cx2;
-	bool nxtlev[NSYMBOLS];
+	bool nxtlev[SYMBOLS_COUNT];
 	if (sym == symbol::ident)
 	{
 		i = position(id, *ptx);//在符号表中查到该标识符所在位置
@@ -935,7 +935,7 @@ int statement(bool* fsys, int* ptx, int lev)
 				if (sym == symbol::becomes)
 				{
 					getsymdo;
-					memcpy(nxtlev, fsys, sizeof(bool) * NSYMBOLS);
+					memcpy(nxtlev, fsys, sizeof(bool) * SYMBOLS_COUNT);
 					expressiondo(nxtlev, ptx, lev);
 					if (i != 0)//如果不曾出错，i将不为0，i所指为当前语句
 							//左部标识符在符号表中的位置 
@@ -946,7 +946,7 @@ int statement(bool* fsys, int* ptx, int lev)
 				else if (sym == symbol::timeseql) // *=运算 
 				{
 					getsymdo;
-					memcpy(nxtlev, fsys, sizeof(bool) * NSYMBOLS);
+					memcpy(nxtlev, fsys, sizeof(bool) * SYMBOLS_COUNT);
 					gendo(fct::lod, lev - table[i].level, table[i].adr);
 					expressiondo(nxtlev, ptx, lev);
 					if (i != 0)
@@ -958,7 +958,7 @@ int statement(bool* fsys, int* ptx, int lev)
 				else if (sym == symbol::slasheql) // /=运算 
 				{
 					getsymdo;
-					memcpy(nxtlev, fsys, sizeof(bool) * NSYMBOLS);
+					memcpy(nxtlev, fsys, sizeof(bool) * SYMBOLS_COUNT);
 					gendo(fct::lod, lev - table[i].level, table[i].adr);
 					expressiondo(nxtlev, ptx, lev);
 					if (i != 0)
@@ -1081,7 +1081,7 @@ int statement(bool* fsys, int* ptx, int lev)
 					getsymdo;
 					if (sym != symbol::becomes) error(13);             //赋值语句左部标识符后应是赋值号:=
 					else getsymdo;
-					memcpy(nxtlev, fsys, sizeof(bool) * NSYMBOLS);
+					memcpy(nxtlev, fsys, sizeof(bool) * SYMBOLS_COUNT);
 					nxtlev[(int)symbol::tosym] = true;                     //后跟符to和downto
 					nxtlev[(int)symbol::downtosym] = true;
 					expressiondo(nxtlev, ptx, lev);           //处理赋值语句右部的表达式E1
@@ -1093,7 +1093,7 @@ int statement(bool* fsys, int* ptx, int lev)
 						cx1 = cx;       //保存循环开始点
 						//将循环判断变量取出放到栈顶
 						gendo(fct::lod, lev - table[i].level, table[i].adr);
-						memcpy(nxtlev, fsys, sizeof(bool) * NSYMBOLS);    //处理表达式E2
+						memcpy(nxtlev, fsys, sizeof(bool) * SYMBOLS_COUNT);    //处理表达式E2
 						nxtlev[(int)symbol::dosym] = true;                         //后跟符do
 						expressiondo(nxtlev, ptx, lev);
 						/*判断循环变量条件，比如for i:=E1 to E2 do S中，判断i是否小于E2，如小于等于，继续循环，大于的话，跳出循环*/
@@ -1127,7 +1127,7 @@ int statement(bool* fsys, int* ptx, int lev)
 						cx1 = cx;            //保存循环开始点
 						//将循环判断变量取出放到栈顶                         
 						gendo(fct::lod, lev - table[i].level, table[i].adr);
-						memcpy(nxtlev, fsys, sizeof(bool) * NSYMBOLS);      //处理表达式E2
+						memcpy(nxtlev, fsys, sizeof(bool) * SYMBOLS_COUNT);      //处理表达式E2
 						nxtlev[(int)symbol::dosym] = true;                           //后跟符do
 						expressiondo(nxtlev, ptx, lev);
 						/*判断循环变量条件，比如for i:=E1 downto E2 do S中，判断i是否大于等于E2，如大于等于，继续循环， 小于的话，跳出循环*/
@@ -1233,7 +1233,7 @@ int statement(bool* fsys, int* ptx, int lev)
 								error(11);          /*过程未找到*/
 							}
 						}
-						memcpy(nxtlev, fsys, sizeof(bool) * NSYMBOLS);
+						memcpy(nxtlev, fsys, sizeof(bool) * SYMBOLS_COUNT);
 						nxtlev[(int)symbol::rparen] = true;
 						nxtlev[(int)symbol::comma] = true;     /* write的后跟符号为）or，*/
 						expressiondo(nxtlev, ptx, lev);/* 调用表达式处理，此处与read不同，read为给变量赋值*/
@@ -1289,7 +1289,7 @@ int statement(bool* fsys, int* ptx, int lev)
 					if (sym == symbol::ifsym)     /*准备按照if语句处理*/
 					{
 						getsymdo;
-						memcpy(nxtlev, fsys, sizeof(bool) * NSYMBOLS);
+						memcpy(nxtlev, fsys, sizeof(bool) * SYMBOLS_COUNT);
 						nxtlev[(int)symbol::thensym] = true;
 						nxtlev[(int)symbol::dosym] = true;    /*后跟符号为then或do*/
 						conditiondo(nxtlev, ptx, lev);   /*调用条件处理（逻辑运算）函数*/
@@ -1332,7 +1332,7 @@ int statement(bool* fsys, int* ptx, int lev)
 						if (sym == symbol::beginsym)   /*准备按照复合语句处理*/
 						{
 							getsymdo;
-							memcpy(nxtlev, fsys, sizeof(bool) * NSYMBOLS);
+							memcpy(nxtlev, fsys, sizeof(bool) * SYMBOLS_COUNT);
 							nxtlev[(int)symbol::semicolon] = true;
 							nxtlev[(int)symbol::endsym] = true;/*后跟符号为分号或end*/
 							/*循环调用语句处理函数，直到下一个符号不是语句开始符号或收到end*/
@@ -1364,7 +1364,7 @@ int statement(bool* fsys, int* ptx, int lev)
 							{
 								cx1 = cx;        /*保存判断条件超作的位置*/
 								getsymdo;
-								memcpy(nxtlev, fsys, sizeof(bool) * NSYMBOLS);
+								memcpy(nxtlev, fsys, sizeof(bool) * SYMBOLS_COUNT);
 								nxtlev[(int)symbol::dosym] = true;/*后跟符号为do*/
 								conditiondo(nxtlev, ptx, lev);  /*调用条件处理*/
 								cx2 = cx;       /*保存循环体的结束的下一个位置*/
@@ -1383,7 +1383,7 @@ int statement(bool* fsys, int* ptx, int lev)
 							}
 							else
 							{
-								memset(nxtlev, 0, sizeof(bool) * NSYMBOLS);/*语句结束无补救集合*/
+								memset(nxtlev, 0, sizeof(bool) * SYMBOLS_COUNT);/*语句结束无补救集合*/
 								testdo(fsys, nxtlev, 19);/*检测语句结束的正确性*/
 							}
 						}
@@ -1400,12 +1400,12 @@ int statement(bool* fsys, int* ptx, int lev)
 int expression(bool* fsys, int* ptx, int lev)
 {
 	enum symbol addop;                    /*用于保存正负号*/
-	bool nxtlev[NSYMBOLS];
+	bool nxtlev[SYMBOLS_COUNT];
 	if (sym == symbol::plus || sym == symbol::minus)             /*开头的正负号，此时当前表达式被看作一个正的或负的项*/
 	{
 		addop = sym;                    /*保存开头的正负号*/
 		getsymdo;
-		memcpy(nxtlev, fsys, sizeof(bool) * NSYMBOLS);
+		memcpy(nxtlev, fsys, sizeof(bool) * SYMBOLS_COUNT);
 		nxtlev[(int)symbol::plus] = true;
 		nxtlev[(int)symbol::minus] = true;
 		termdo(nxtlev, ptx, lev);                /*处理项*/
@@ -1416,7 +1416,7 @@ int expression(bool* fsys, int* ptx, int lev)
 	}
 	else                             /*此时表达式被看作项的加减*/
 	{
-		memcpy(nxtlev, fsys, sizeof(bool) * NSYMBOLS);
+		memcpy(nxtlev, fsys, sizeof(bool) * SYMBOLS_COUNT);
 		nxtlev[(int)symbol::plus] = true;
 		nxtlev[(int)symbol::minus] = true;
 		termdo(nxtlev, ptx, lev);            /*处理项*/
@@ -1425,7 +1425,7 @@ int expression(bool* fsys, int* ptx, int lev)
 	{
 		addop = sym;
 		getsymdo;
-		memcpy(nxtlev, fsys, sizeof(bool) * NSYMBOLS);
+		memcpy(nxtlev, fsys, sizeof(bool) * SYMBOLS_COUNT);
 		nxtlev[(int)symbol::plus] = true;
 		nxtlev[(int)symbol::minus] = true;
 		termdo(nxtlev, ptx, lev);              /*处理项*/
@@ -1446,8 +1446,8 @@ int expression(bool* fsys, int* ptx, int lev)
 int term(bool* fsys, int* ptx, int lev)
 {
 	enum symbol mulop;               /*用于保存乘除法符号*/
-	bool nxtlev[NSYMBOLS];
-	memcpy(nxtlev, fsys, sizeof(bool) * NSYMBOLS);
+	bool nxtlev[SYMBOLS_COUNT];
+	memcpy(nxtlev, fsys, sizeof(bool) * SYMBOLS_COUNT);
 	nxtlev[(int)symbol::times] = true;
 	nxtlev[(int)symbol::slash] = true;
 	factordo(nxtlev, ptx, lev);       /*处理因子*/
@@ -1473,7 +1473,7 @@ int term(bool* fsys, int* ptx, int lev)
 int factor(bool* fsys, int* ptx, int lev)
 {
 	int i;
-	bool nxtlev[NSYMBOLS];
+	bool nxtlev[SYMBOLS_COUNT];
 	testdo(facbegsys, fsys, 24);           /*检测因子的开始符好号*/
 	while (inset((int)sym, facbegsys))          /*循环直到不是因子开始符号*/
 	{
@@ -1584,7 +1584,7 @@ int factor(bool* fsys, int* ptx, int lev)
 				if (sym == symbol::lparen)                                           /*因子为表达式*/
 				{
 					getsymdo;
-					memcpy(nxtlev, fsys, sizeof(bool) * NSYMBOLS);
+					memcpy(nxtlev, fsys, sizeof(bool) * SYMBOLS_COUNT);
 					nxtlev[(int)symbol::rparen] = true;
 					expressiondo(nxtlev, ptx, lev);
 					if (sym == symbol::rparen)
@@ -1607,7 +1607,7 @@ int factor(bool* fsys, int* ptx, int lev)
 int condition(bool* fsys, int* ptx, int lev)
 {
 	enum symbol relop;
-	bool nxtlev[NSYMBOLS];
+	bool nxtlev[SYMBOLS_COUNT];
 	if (sym == symbol::oddsym)                        /*准备按照odd运算处理*/
 	{
 		getsymdo;
@@ -1616,7 +1616,7 @@ int condition(bool* fsys, int* ptx, int lev)
 	}
 	else
 	{
-		memcpy(nxtlev, fsys, sizeof(bool) * NSYMBOLS);
+		memcpy(nxtlev, fsys, sizeof(bool) * SYMBOLS_COUNT);
 		nxtlev[(int)symbol::eql] = true;
 		nxtlev[(int)symbol::neq] = true;
 		nxtlev[(int)symbol::lss] = true;
