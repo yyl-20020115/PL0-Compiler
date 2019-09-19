@@ -1,7 +1,7 @@
 var m,n,r,q;
 procedure gcd;
 	begin
-		while r#0 do
+		while r<>0 do
 			begin
 				q:=m/n;
 				r:=m-q*n;

@@ -107,7 +107,7 @@ void init()
 	ssym['='] = symbol::eql;
 	ssym[','] = symbol::comma;
 	ssym['.'] = symbol::period;
-	ssym['#'] = symbol::neq;  //去掉原先单字符‘#’的设置部分
+	//ssym['#'] = symbol::neq;  //去掉原先单字符‘#’的设置部分,使用 "<>" 作为不等号
 	ssym[';'] = symbol::semicolon;
 	/*设置保留字名字,按照字母顺序,便于折半查找*/
 	strcpy(&(word[0][0]), "begin");

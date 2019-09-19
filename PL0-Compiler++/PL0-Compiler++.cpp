@@ -4,7 +4,7 @@ PL0_Compiler::PL0_Compiler()
 	: table()
 	, mnemonic()
 	, ch(0)
-	, source(nullptr)
+	, source_input(nullptr)
 	, sym(symbol::nul)
 	, ssym()
 	, wsym()
@@ -25,51 +25,41 @@ PL0_Compiler::PL0_Compiler()
 {
 	this->Reset();
 }
-
 PL0_Compiler::~PL0_Compiler()
 {
 }
-
-void PL0_Compiler::SetSource(std::wistream* source)
+void PL0_Compiler::SetSourceInput(std::wistream* source)
 {
-	this->source = source;
+	this->source_input = source;
 }
-
-std::wistream* PL0_Compiler::GetSource()
+std::wistream* PL0_Compiler::GetSourceInput()
 {
-	return this->source;
+	return this->source_input;
 }
-
 void PL0_Compiler::SetCommonInput(std::wistream* common_input)
 {
 	this->common_input = common_input;
 }
-
 std::wistream* PL0_Compiler::GetCommonInput()
 {
 	return this->common_input;
 }
-
 void PL0_Compiler::SetCommonOutput(std::wostream* common_output)
 {
 	this->common_output = common_output;
 }
-
 std::wostream* PL0_Compiler::GetCommonOutput()
 {
 	return this->common_output;
 }
-
 void PL0_Compiler::SetErrorOutput(std::wostream* error_output)
 {
 	this->error_output = error_output;
 }
-
 std::wostream* PL0_Compiler::GetErrorOutput()
 {
 	return this->error_output;
 }
-
 void PL0_Compiler::Reset()
 {
 	for (int i = 0; i < SYMBOLS_COUNT; i++) {
@@ -87,7 +77,7 @@ void PL0_Compiler::Reset()
 	this->ssym[L'='] = symbol::eql;
 	this->ssym[L','] = symbol::comma;
 	this->ssym[L'.'] = symbol::period;
-	this->ssym[L'#'] = symbol::neq;  //
+	//this->ssym[L'#'] = symbol::neq;  //去掉原先单字符‘#’的设置部分,使用 "<>" 作为不等号
 	this->ssym[L';'] = symbol::semicolon;
 	//设置保留字符号
 	this->wsym[0] = symbol::beginsym;
@@ -167,8 +157,9 @@ void PL0_Compiler::Reset()
 	this->cx = 0;
 	this->num = 0;
 	this->error_count = 0;
+	this->id.clear();
+	this->a.clear();
 }
-
 void PL0_Compiler::Execute()
 {
 	this->Reset();
@@ -177,16 +168,19 @@ void PL0_Compiler::Execute()
 
 	if (-1 != getsym())
 	{
-		addset(nxtlev, declbegsys, statbegsys, SYMBOLS_COUNT);
+		this->addset(nxtlev, declbegsys, statbegsys, SYMBOLS_COUNT);
+		
 		nxtlev[(int)symbol::period] = true;
-		if (-1 == block(0, 0, nxtlev))  //compile program
+
+		if (-1 == compile(0, 0, nxtlev))  //compile program
 		{
+			this->common_print(L"Failed to compile program!\n");
 			return;
 		}
 
 		if (sym != symbol::period)
 		{
-			error(9);
+			this->error(9);
 		}
 		if (this->error_count == 0)
 		{
@@ -195,18 +189,14 @@ void PL0_Compiler::Execute()
 		}
 		else
 		{
-			if (this->error_output != nullptr) {
-				*this->error_output << (L"Errors in pl/0 program");
-			}
+			this->error_print(L"Errors in pl/0 program");
 		}
 	}
 }
-
 bool PL0_Compiler::inset(int e, bool* s)
 {
 	return s[e];
 }
-
 void PL0_Compiler::addset(bool* sr, bool* s1, bool* s2, int n)
 {
 	for (int i = 0; i < n; i++)
@@ -214,7 +204,6 @@ void PL0_Compiler::addset(bool* sr, bool* s1, bool* s2, int n)
 		sr[i] = s1[i] || s2[i];
 	}
 }
-
 void PL0_Compiler::subset(bool* sr, bool* s1, bool* s2, int n)
 {
 	for (int i = 0; i < n; i++)
@@ -222,7 +211,6 @@ void PL0_Compiler::subset(bool* sr, bool* s1, bool* s2, int n)
 		sr[i] = s1[i] && (!s2[i]);
 	}
 }
-
 void PL0_Compiler::mulset(bool* sr, bool* s1, bool* s2, int n)
 {
 	for (int i = 0; i < n; i++)
@@ -230,7 +218,6 @@ void PL0_Compiler::mulset(bool* sr, bool* s1, bool* s2, int n)
 		sr[i] = s1[i] && s2[i];
 	}
 }
-
 void PL0_Compiler::error(int n)
 {
 	if (this->error_output != nullptr)
@@ -244,31 +231,31 @@ void PL0_Compiler::error(int n)
 //  被函数getsym调用
 int PL0_Compiler::getch()
 {
-	if (cc == ll)
+	if (this->cc == this->ll)
 	{
-		if (this->source->eof())
+		if (this->source_input->eof())
 		{
 			this->common_print(L"Program terminated");
 			return -1;
 		}
-		ll = 0;
-		cc = 0;
-		ch = L' ';
-		while (ch != L'\n')
+		this->ll = 0;
+		this->cc = 0;
+		this->ch = L' ';
+		while (this->ch != L'\n')
 		{
-			*this->source >> ch;
+			*this->source_input >> ch;
 
-			if (ch == -1)
+			if (this->ch == -1)
 			{
 				break;
 			}
 			this->common_print(ch);
-			line += ch;
-			ll++;
+			this->line += this->ch;
+			this->ll++;
 		}
 		this->common_print('\n');
 	}
-	ch = line[cc];
+	this->ch = this->line[cc];
 	cc++;
 	return 0;
 }
@@ -279,7 +266,6 @@ void PL0_Compiler::common_print(wchar_t c)
 		*this->common_output << c;
 	}
 }
-
 void PL0_Compiler::common_print(const wchar_t* s)
 {
 	if (this->common_output != nullptr && s != nullptr) {
@@ -308,6 +294,12 @@ void PL0_Compiler::common_input_(wchar_t& c)
 {
 	if (this->common_input != nullptr) {
 		*this->common_input >> c;
+	}
+}
+void PL0_Compiler::error_print(const wchar_t* s)
+{
+	if (this->error_output != nullptr) {
+		*this->error_output << s;
 	}
 }
 //词法分析，获取一个符号
@@ -370,7 +362,7 @@ int PL0_Compiler::getsym()
 		}
 		else
 		{
-			if (ch == L':')             //检测赋值符号
+			if (ch == L':') //检测赋值符号
 			{
 				if (-1 == getch())return -1;
 				if (ch == L'=')
@@ -380,12 +372,12 @@ int PL0_Compiler::getsym()
 				}
 				else
 				{
-					sym = symbol::nul;            //不能识别的符号
+					sym = symbol::nul; //不能识别的符号
 				}
 			}
 			else
 			{
-				if (this->ch == L'<')         //检测小于或小于等于符号
+				if (this->ch == L'<') //检测小于或小于等于符号
 				{
 					if (-1 == getch())return -1;
 					if (this->ch == L'=')
@@ -394,10 +386,9 @@ int PL0_Compiler::getsym()
 						if (-1 == getch())return -1;
 					}
 					//增加不等号语法分析
-					else if (this->ch == '>')//小于号后面跟着大于号
+					else if (this->ch == '>') //小于号后面跟着大于号
 					{
-						sym = symbol::neq;//构成不等号<>
-						this->common_print(L"Get <>");
+						sym = symbol::neq; //构成不等号<>
 						if (-1 == getch())return -1;
 					}
 					else
@@ -426,7 +417,6 @@ int PL0_Compiler::getsym()
 						if (this->ch == L'=')
 						{
 							sym = symbol::timeseql;//构成*=号
-							this->common_print(L"Get *=\n");
 							if (-1 == getch())return -1;
 						}
 						else
@@ -440,7 +430,6 @@ int PL0_Compiler::getsym()
 						if (this->ch == '=')
 						{
 							sym = symbol::slasheql;//构成/=号
-							this->common_print(L"Get /=\n");
 							if (-1 == getch())return -1;
 						}
 						else if (this->ch == '*')//增加注释功能
@@ -460,7 +449,6 @@ int PL0_Compiler::getsym()
 
 								if (b == L'*' && a == L'/')
 								{
-									this->common_print(L"Comment End\n");
 									end = 0;
 									break;
 								}
@@ -478,7 +466,6 @@ int PL0_Compiler::getsym()
 						if (ch == '+')
 						{
 							sym = symbol::plusplus;//
-							this->common_print(L"Got ++ \n");
 							if (-1 == getch())return -1;
 						}
 						else
@@ -492,7 +479,6 @@ int PL0_Compiler::getsym()
 						if (ch == '-')
 						{
 							sym = symbol::minusminus;//
-							this->common_print(L"Got -- \n");
 							if (-1 == getch())return -1;
 						}
 						else
@@ -576,13 +562,13 @@ int PL0_Compiler::test(bool* s1, bool* s2, int n)
 //tx:名字表当前尾指针
 //fsys:当前模块后跟符号集合
 
-int PL0_Compiler::block(int lev, int tx, bool* fsys)
+int PL0_Compiler::compile(int lev, int tx, bool* fsys)
 {
 	int i;
 	int dx;                         //名字分配到的相对地址
 	int tx0;                        //保留初始tx
 	int cx0;                        //保留初始cx
-	bool nxtlev[SYMBOLS_COUNT];      //在下级函数的参数中，符号集合均为值参，但由于使用数组
+	bool nxtlev[SYMBOLS_COUNT] = { false };      //在下级函数的参数中，符号集合均为值参，但由于使用数组
 									//实现，传递进来的是指针，为防止下级函数改变上级函数的
 									//集合，开辟新的空间传递给下级函数
 	dx = 3;
@@ -676,7 +662,7 @@ int PL0_Compiler::block(int lev, int tx, bool* fsys)
 			}
 			memcpy(nxtlev, fsys, sizeof(bool) * SYMBOLS_COUNT);
 			nxtlev[(int)symbol::semicolon] = true;
-			if (-1 == block(lev + 1, tx, nxtlev))
+			if (-1 == compile(lev + 1, tx, nxtlev))
 			{
 				return -1;//递归调用
 			}
@@ -744,7 +730,6 @@ int PL0_Compiler::block(int lev, int tx, bool* fsys)
 //ptx:名字表尾指针的指针，为了可以改变名字表尾指针的数值
 //lev:名字所在的层次，以后所有的lev都是这样
 //pdx:为当前应分配的变量的相对地址，分配后要增加1
-
 void PL0_Compiler::enter(otype k, int* ptx, int lev, int* pdx)
 {
 	(*ptx)++;

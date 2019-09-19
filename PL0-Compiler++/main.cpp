@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 		compiler->SetCommonOutput(&std::wcout);
 		compiler->SetErrorOutput(&std::wcerr);
 
-		compiler->SetSource(&fs);
+		compiler->SetSourceInput(&fs);
 		
 		compiler->Execute();
 	}

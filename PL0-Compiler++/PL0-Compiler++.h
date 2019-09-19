@@ -73,7 +73,7 @@ protected:
 
 	std::vector<tablestruct> table;
 	std::vector<instruction> code;
-	std::wistream* source;
+	std::wistream* source_input;
 	std::wistream* common_input;
 	std::wostream* common_output;
 	std::wostream* error_output;
@@ -94,8 +94,8 @@ public:
 
 public:
 
-	void SetSource(std::wistream* source);
-	std::wistream* GetSource();
+	void SetSourceInput(std::wistream* source);
+	std::wistream* GetSourceInput();
 
 	void SetCommonInput(std::wistream* common_input);
 	std::wistream* GetCommonInput();
@@ -134,8 +134,10 @@ protected:
 	void common_input_(std::wstring& text);
 	void common_input_(wchar_t& c);
 
+	void error_print(const wchar_t* s);
+
 	int gen(fct x, int y, int z);
-	int block(int lev, int tx, bool* fsys);
+	int compile(int lev, int tx, bool* fsys);
 	void interpret();
 	int factor(bool* fsys, int* ptx, int lev);
 	int term(bool* fsys, int* ptx, int lev);
