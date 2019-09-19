@@ -8,7 +8,7 @@ I just simply made project of the source code both in form of Visual Studio proj
 And an upgrade version in C++ which is easier to read and use (maybe add more syntax or function as you wish).
 
 NOTICE:
-Here we use "<>" as not-equals-to, instead of the "##" sign.
+Here we use "<>" as not-equals-to, instead of the "#" sign.
 and we use "/* */" for comment and not "{}".
 
 More details, please read the code.
