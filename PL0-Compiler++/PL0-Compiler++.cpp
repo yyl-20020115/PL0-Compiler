@@ -578,7 +578,8 @@ int PL0_Compiler::compile(int lev, int tx, bool* fsys)
 	//	error(32);
 	//}
 	do {
-		if (sym == symbol::constsym)         //收到常量声明符号，开始处理常量声明
+		//收到常量声明符号，开始处理常量声明
+		if (sym == symbol::constsym)         
 		{
 			if (-1 == getsym())return -1;
 			do {
@@ -598,7 +599,9 @@ int PL0_Compiler::compile(int lev, int tx, bool* fsys)
 				}
 			} while (sym == symbol::ident);
 		}
-		if (sym == symbol::varsym)//收到变量声名符号，开始处理变量声名
+		//不要用else
+		//收到变量声明符号，开始处理变量声明
+		if (sym == symbol::varsym)
 		{
 			if (-1 == getsym())return -1;
 			do {
@@ -618,7 +621,9 @@ int PL0_Compiler::compile(int lev, int tx, bool* fsys)
 				}
 			} while (sym == symbol::ident);
 		}
-		if (sym == symbol::charsym)//收到符号型声名符号，开始处理符号型声名
+		//不要用else
+		//收到符号型声明符号，开始处理符号型声明
+		if (sym == symbol::charsym)
 		{
 			if (-1 == getsym())return -1;
 			do {
@@ -638,7 +643,9 @@ int PL0_Compiler::compile(int lev, int tx, bool* fsys)
 				}
 			} while (sym == symbol::ident);
 		}
-		while (sym == symbol::procsym)//收到过程声名符号，开始处理过程声名
+		//不要用else
+		//收到过程声明符号，开始处理过程声明
+		while (sym == symbol::procsym)
 		{
 			if (-1 == getsym())return -1;
 			if (sym == symbol::ident)
